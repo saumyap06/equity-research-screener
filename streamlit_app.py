@@ -191,10 +191,21 @@ with st.sidebar:
         selected_page = st.radio("Navigate", PAGES, label_visibility="collapsed")
 
     st.divider()
-    ticker_symbol = st.text_input("Ticker", value="BAJFINANCE.NS", help="e.g. BAJFINANCE.NS, TCS.NS, INFY.NS")
-    analyze_clicked = st.button("Analyze", type="primary", width="stretch")
-    st.divider()
     st.caption("Educational/academic project only. Not investment advice.")
+
+# ---------------------------------------------------------------------
+# MAIN HEADER + TICKER INPUT (main screen, not sidebar)
+# ---------------------------------------------------------------------
+st.title("📊 Equity Research Screener")
+st.caption("Type any stock ticker to get a company overview, financials, ratios, and a rule-based recommendation.")
+
+col1, col2 = st.columns([3, 1])
+with col1:
+    ticker_symbol = st.text_input("Enter ticker (e.g. BAJFINANCE.NS, TCS.NS, INFY.NS)", value="BAJFINANCE.NS")
+with col2:
+    st.write("")
+    st.write("")
+    analyze_clicked = st.button("Analyze", type="primary", width="stretch")
 
 # persist last analyzed ticker across page nav clicks
 if "ticker" not in st.session_state:
@@ -206,8 +217,7 @@ if analyze_clicked:
 # MAIN CONTENT
 # ---------------------------------------------------------------------
 if not st.session_state.ticker:
-    st.title("📊 AI Equity Research Assistant")
-    st.write("Enter a ticker in the sidebar and click **Analyze** to get started.")
+    st.info("Enter a ticker above and click **Analyze** to get started.")
 else:
     with st.spinner(f"Fetching data for {st.session_state.ticker}..."):
         try:
