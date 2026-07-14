@@ -23,6 +23,27 @@ import pandas as pd
 
 st.set_page_config(page_title="Equity Research Screener", page_icon="📊", layout="wide")
 
+# --- Custom background & styling ---
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(180deg, #0e1117 0%, #131722 45%, #0e1117 100%);
+    }
+    div[data-testid="stMetric"] {
+        background-color: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #10141c;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # ---------------------------------------------------------------------
 # DATA FUNCTIONS (same logic as your original script)
@@ -117,6 +138,26 @@ def generate_recommendation(ratios, stock_status):
 
 
 # ---------------------------------------------------------------------
+# SIDEBAR
+# ---------------------------------------------------------------------
+with st.sidebar:
+    st.header("📊 About this project")
+    st.write(
+        "Built by **Saumya Pandey**, PGDM Finance student at JAGSoM, Bengaluru."
+    )
+    st.write(
+        "This tool pulls live financial data for any listed stock and generates "
+        "a rule-based BUY / HOLD / SELL call using fundamentals, valuation, "
+        "and price trend."
+    )
+    st.markdown("**How the score works:**")
+    st.write("✅ ROE, growth, low debt, cheap valuation, uptrend → adds points")
+    st.write("⚠️ Weak profitability, high debt, expensive valuation, downtrend → subtracts points")
+    st.divider()
+    st.caption("Educational/academic project only. Not investment advice.")
+
+
+# ---------------------------------------------------------------------
 # UI
 # ---------------------------------------------------------------------
 st.title("📊 Equity Research Screener")
@@ -128,7 +169,7 @@ with col1:
 with col2:
     st.write("")
     st.write("")
-    analyze_clicked = st.button("Analyze", type="primary", use_container_width=True)
+    analyze_clicked = st.button("Analyze", type="primary", width="stretch")
 
 if analyze_clicked and ticker_symbol:
     with st.spinner(f"Fetching data for {ticker_symbol}..."):
@@ -155,17 +196,17 @@ if analyze_clicked and ticker_symbol:
                 tab1, tab2, tab3 = st.tabs(["Income Statement", "Balance Sheet", "Cash Flow"])
                 with tab1:
                     try:
-                        st.dataframe(ticker_obj.financials, use_container_width=True)
+                        st.dataframe(ticker_obj.financials, width="stretch")
                     except Exception:
                         st.write("Not available.")
                 with tab2:
                     try:
-                        st.dataframe(ticker_obj.balance_sheet, use_container_width=True)
+                        st.dataframe(ticker_obj.balance_sheet, width="stretch")
                     except Exception:
                         st.write("Not available.")
                 with tab3:
                     try:
-                        st.dataframe(ticker_obj.cashflow, use_container_width=True)
+                        st.dataframe(ticker_obj.cashflow, width="stretch")
                     except Exception:
                         st.write("Not available.")
 
@@ -174,12 +215,17 @@ if analyze_clicked and ticker_symbol:
                 ratios = get_key_ratios(info)
                 ratio_cols = st.columns(5)
                 ratio_items = list(ratios.items())
+
+                # simple color rules per ratio, just for visual signal
+                good_high = {"ROE", "ROA", "Revenue Growth (YoY)", "Earnings Growth (YoY)", "Dividend Yield", "Net Profit Margin"}
+
                 for i, (k, v) in enumerate(ratio_items):
                     with ratio_cols[i % 5]:
                         if v is None:
                             st.metric(k, "N/A")
                         elif any(x in k for x in ["Margin", "Growth", "ROE", "ROA", "Yield"]):
-                            st.metric(k, f"{v*100:.2f}%")
+                            delta_val = "Healthy" if (v > 0 and k in good_high) else None
+                            st.metric(k, f"{v*100:.2f}%", delta=delta_val, delta_color="normal")
                         else:
                             st.metric(k, f"{v:.2f}")
 
@@ -205,3 +251,6 @@ if analyze_clicked and ticker_symbol:
 
         except Exception as e:
             st.error(f"Something went wrong: {e}")
+
+st.divider()
+st.caption("Built with Python & Streamlit")
