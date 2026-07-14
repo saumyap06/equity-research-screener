@@ -12,6 +12,7 @@ A Python + Streamlit tool that pulls live financial data for any stock and gener
 ## How to run
 pip install streamlit yfinance pandas
 streamlit run streamlit_app.py
+
 Enter any stock ticker (e.g. `BAJFINANCE.NS`, `TCS.NS`) and click Analyze.
 
 ## Disclaimer
